@@ -25,11 +25,11 @@ namespace PhotoGallery.Models
         {
         }
 
+        public virtual DbSet<Picture> Pictures { get; set; }
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
         }
 
-        public System.Data.Entity.DbSet<PhotoGallery.Models.Picture> ImageViewModels { get; set; }
     }
 }

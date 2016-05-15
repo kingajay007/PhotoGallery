@@ -16,7 +16,7 @@
         </th>
        
         <th>
-            @Html.DisplayNameFor(model => model.Path)
+            <label>Image</label>
         </th>
       
         <th></th>
@@ -29,12 +29,12 @@
         </td>
       
         <td>
-            <img src="@Url.Content(item.Path)" />
+            <img height="200" width="200" src="@Url.Content(item.Path)" />
         </td>
         
         <td>
             @Html.ActionLink("Upload", "Create", new { id = item.Id }) |
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+            @Html.ActionLink("Download", "Download", new { id=item.Id }) |
             @Html.ActionLink("Details", "Details", new { id=item.Id }) |
             @Html.ActionLink("Delete", "Delete", new { id=item.Id })
         </td>

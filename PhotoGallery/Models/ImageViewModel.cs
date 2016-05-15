@@ -12,10 +12,11 @@ namespace PhotoGallery.Models
         public int Id { get; set; }
 
         [NotMapped]
-        public HttpPostedFileBase Image { get; set; }
+        public IEnumerable<HttpPostedFileBase> Images { get; set; }
         public string Name { get; set; }
         public long Size { get; set; }
         public string Path { get; set; }
+        public string ContentType { get; set; }
     }
 
     public class ImageStore

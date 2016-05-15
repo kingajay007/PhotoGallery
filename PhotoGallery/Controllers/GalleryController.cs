@@ -21,20 +21,20 @@ namespace PhotoGallery.Controllers
         public ActionResult Index()
         {
 
-            var uploadedFiles = new List<Picture>();
+            var uploadedFiles = _context.Pictures;
 
-            var files = Directory.GetFiles(Server.MapPath("~/UploadedFiles"));
+            //var files = Directory.GetFiles(Server.MapPath("~/UploadedFiles"));
 
-            foreach (var file in files)
-            {
-                var fileInfo = new FileInfo(file);
+            //foreach (var file in files)
+            //{
+            //    var fileInfo = new FileInfo(file);
 
-                var picture = new Picture() { Name = Path.GetFileName(file) };
-                picture.Size = fileInfo.Length;
+            //    var picture = new Picture() { Name = Path.GetFileName(file) };
+            //    picture.Size = fileInfo.Length;
 
-                picture.Path = ("~/UploadedFiles/") + Path.GetFileName(file);
-                uploadedFiles.Add(picture);
-            }
+            //    picture.Path = ("~/UploadedFiles/") + Path.GetFileName(file);
+            //    uploadedFiles.Add(picture);
+            //}
 
             return View(uploadedFiles);
            
@@ -44,6 +44,18 @@ namespace PhotoGallery.Controllers
         public ActionResult Details(int id)
         {
             return View();
+        }
+
+        // GET: Gallery/Details/5
+        public ActionResult Download(int id)
+        {
+            var picture = _context.Pictures.Find(id);
+            if (picture!=null)
+            {
+                return File(Path.GetFileName(picture.Name), picture.ContentType);
+            }
+
+            return HttpNotFound("File not found");
         }
 
         // GET: Gallery/Create
@@ -61,19 +73,30 @@ namespace PhotoGallery.Controllers
             try
             {
 
-                if (model.Image!=null)
-                {
-                    var postedFile = model.Image;
-                    postedFile.SaveAs(Server.MapPath("~/UploadedFiles/") + Path.GetFileName(postedFile.FileName));
-                }
                 // TODO: Add insert logic here
                 foreach (string file in Request.Files)
                 {
-                    //var postedFile = Request.Files[file];
-                    var postedFile = model.Image;
-                    postedFile.SaveAs(Server.MapPath("~/UploadedFiles/") + Path.GetFileName(postedFile.FileName));
-                }
+                    var postedFile = Request.Files[file];
+                    //var postedFile = model.Image;
+                    if (postedFile?.ContentLength>0)
+                    {
+                        var fileSaveName = string.Format("{0}-{1}", DateTime.Now.ToString(), postedFile.FileName);
 
+                        postedFile.SaveAs(Server.MapPath("~/UploadedFiles/") + Path.GetFileName(fileSaveName));
+
+                        var picture = new Picture()
+                        {
+                            Name = model.Name,
+                            Path = string.Format("~/UploadedFiles/{0}", fileSaveName),
+                            ContentType = postedFile.ContentType
+                        };
+
+                        _context.Entry<Picture>(picture).State = System.Data.Entity.EntityState.Added;
+
+                    }
+                    
+                }
+                _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             catch
