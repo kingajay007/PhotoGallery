@@ -46,16 +46,20 @@ namespace PhotoGallery.Controllers
             return View();
         }
 
-        // GET: Gallery/Details/5
-        public ActionResult Download(int id)
+        //[Authorize]
+        public void SafeDownload(int id)
         {
             var picture = _context.Pictures.Find(id);
-            if (picture!=null)
-            {
-                return File(Path.GetFileName(picture.Name), picture.ContentType);
-            }
 
-            return HttpNotFound("File not found");
+
+            var fileBytes = System.IO.File.ReadAllBytes(Server.MapPath(picture.Path));
+
+                string downloadFileName = picture.Path;
+                //Write it back to the client
+                Response.ContentType = picture.ContentType;
+                Response.AddHeader("content-disposition", string.Format("attachment;  filename={0}", downloadFileName));
+                Response.BinaryWrite(fileBytes);
+           
         }
 
         // GET: Gallery/Create
@@ -80,7 +84,7 @@ namespace PhotoGallery.Controllers
                     //var postedFile = model.Image;
                     if (postedFile?.ContentLength>0)
                     {
-                        var fileSaveName = string.Format("{0}-{1}", DateTime.Now.ToString(), postedFile.FileName);
+                        var fileSaveName = string.Format("{0}-{1}", "SALONISHARMA", postedFile.FileName);
 
                         postedFile.SaveAs(Server.MapPath("~/UploadedFiles/") + Path.GetFileName(fileSaveName));
 
@@ -130,7 +134,10 @@ namespace PhotoGallery.Controllers
         // GET: Gallery/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var picture = _context.Pictures.Find(id);
+            _context.Pictures.Remove(picture);
+            _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
 
         // POST: Gallery/Delete/5
